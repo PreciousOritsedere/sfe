@@ -10,6 +10,11 @@ export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
   bill_payment: 'Bill payment',
 }
 
+const CREDIT_TYPES: readonly TransactionType[] = ['deposit', 'transfer_in', 'conversion']
+
+/** Money coming into the wallet. Conversions are shown as the amount received. */
+export const isCredit = (type: TransactionType) => CREDIT_TYPES.includes(type)
+
 export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
   successful: 'Successful',
   pending: 'Pending',

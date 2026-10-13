@@ -1,47 +1,39 @@
-import type { Transaction, TransactionType } from '@/types/api'
-import { Icon, type IconName, Money } from '@/components/ui'
-import { formatDateTime, TRANSACTION_TYPE_LABELS } from '@/lib/format'
-import { StatusDot } from './StatusDot'
+import type { Transaction } from '@/types/api'
+import { Money } from '@/components/ui'
+import { formatDateTime, formatTime, isCredit, TRANSACTION_TYPE_LABELS } from '@/lib/format'
+import { cx } from '@/lib/cx'
+import { StatusBadge } from './StatusBadge'
+import { TransactionAvatar } from './TransactionAvatar'
 import styles from './TransactionRow.module.css'
-
-const TYPE_ICONS: Record<TransactionType, IconName> = {
-  deposit: 'arrow-down-left',
-  transfer_in: 'arrow-down-left',
-  withdrawal: 'arrow-up-right',
-  transfer_out: 'arrow-up-right',
-  conversion: 'swap',
-  card_payment: 'card',
-  bill_payment: 'receipt',
-}
-
-const CREDIT_TYPES: TransactionType[] = ['deposit', 'transfer_in', 'conversion']
 
 export interface TransactionRowProps {
   transaction: Transaction
   onSelect?: (transaction: Transaction) => void
+  /** Use `time` when rows are already grouped under a date heading. */
+  timestamp?: 'datetime' | 'time'
 }
 
-export function TransactionRow({ transaction: tx, onSelect }: TransactionRowProps) {
-  const isCredit = CREDIT_TYPES.includes(tx.type)
+export function TransactionRow({ transaction: tx, onSelect, timestamp = 'datetime' }: TransactionRowProps) {
+  const credit = isCredit(tx.type)
 
   return (
     <button type="button" className={styles.row} onClick={() => onSelect?.(tx)}>
-      <span className={styles.icon}>
-        <Icon name={TYPE_ICONS[tx.type]} size={18} />
-      </span>
-      <span className={styles.main}>
-        <span className={styles.title}>{TRANSACTION_TYPE_LABELS[tx.type]}</span>
-        <span className={styles.narration}>{tx.narration}</span>
-      </span>
-      <StatusDot status={tx.status} />
-      <span className={styles.end}>
+      <span className={cx(styles.grid, timestamp === 'time' && styles.timeOnly)}>
+        <TransactionAvatar transaction={tx} className={styles.avatar} />
+        <span className={styles.main}>
+          <span className={styles.title}>{TRANSACTION_TYPE_LABELS[tx.type]}</span>
+          <span className={styles.narration}>{tx.narration}</span>
+        </span>
+        <StatusBadge status={tx.status} className={styles.status} />
         <Money
           amount={tx.amount}
           currency={tx.currency}
-          sign={isCredit ? 'credit' : 'debit'}
-          className={isCredit ? styles.credit : styles.amount}
+          sign={credit ? 'credit' : 'debit'}
+          className={cx(styles.amount, credit && styles.credit)}
         />
-        <span className={styles.meta}>{formatDateTime(tx.createdAt)}</span>
+        <time className={styles.meta} dateTime={tx.createdAt}>
+          {timestamp === 'time' ? formatTime(tx.createdAt) : formatDateTime(tx.createdAt)}
+        </time>
       </span>
     </button>
   )
