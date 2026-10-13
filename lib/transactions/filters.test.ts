@@ -1,4 +1,4 @@
-import { DEFAULT_FILTERS, parseFilters, updateSearchParams } from './filters'
+import { DEFAULT_FILTERS, hasActiveFilters, parseFilters, updateSearchParams } from './filters'
 
 const params = (query: string) => new URLSearchParams(query)
 
@@ -27,6 +27,15 @@ describe('parseFilters', () => {
     expect(filters.type).toBe('')
     expect(filters.status).toBe('')
     expect(filters.txn).toBeNull()
+  })
+})
+
+describe('hasActiveFilters', () => {
+  it('is true only for a search, type or status', () => {
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, page: 3, txn: 'txn_1' })).toBe(false)
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, q: '  ' })).toBe(false)
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, q: 'uber' })).toBe(true)
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, status: 'failed' })).toBe(true)
   })
 })
 

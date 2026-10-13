@@ -25,6 +25,9 @@ function parsePage(value: string | null) {
   return value && /^\d+$/.test(value) && page >= 1 ? page : DEFAULT_FILTERS.page
 }
 
+export const hasActiveFilters = ({ q, type, status }: TransactionFilters) =>
+  Boolean(q.trim() || type || status)
+
 /** Reads filters from the URL. Missing or invalid values fall back to the defaults. */
 export function parseFilters(params: Pick<URLSearchParams, 'get'>): TransactionFilters {
   const type = params.get('type') ?? ''
