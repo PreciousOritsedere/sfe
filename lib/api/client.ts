@@ -15,6 +15,8 @@ export class ApiError extends Error {
   }
 }
 
+export const isNotFound = (error: unknown) => error instanceof ApiError && error.status === 404
+
 function isErrorBody(body: unknown): body is ApiErrorBody {
   if (typeof body !== 'object' || body === null || !('error' in body)) return false
   const { error } = body
