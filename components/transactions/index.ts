@@ -1,3 +1,5 @@
 export { StatusBadge } from './StatusBadge'
 export { TransactionAvatar, type TransactionAvatarProps } from './TransactionAvatar'
+export { TransactionList, type TransactionListProps } from './TransactionList'
 export { TransactionRow, type TransactionRowProps } from './TransactionRow'
+export { TransactionsView } from './TransactionsView'
