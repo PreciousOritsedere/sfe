@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, type ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Button, Card, EmptyState } from '@/components/ui'
 import { cx } from '@/lib/cx'
 import { hasActiveFilters } from '@/lib/transactions/filters'
 import { PAGE_SIZE, useTransactions } from '@/lib/transactions/queries'
 import { useTransactionFilters } from '@/lib/transactions/useTransactionFilters'
+import type { Transaction } from '@/types/api'
 import { FilterBar } from './FilterBar'
 import { Pagination } from './Pagination'
+import { TransactionDrawer } from './TransactionDrawer'
 import { TransactionList } from './TransactionList'
 import { TransactionListSkeleton } from './TransactionListSkeleton'
 import styles from './TransactionsView.module.css'
@@ -37,6 +40,7 @@ export function TransactionsViewFallback() {
 }
 
 export function TransactionsView() {
+  const router = useRouter()
   const { filters, setFilters } = useTransactionFilters()
   const { data, isError, isFetching, isPlaceholderData, refetch } = useTransactions(filters)
   const isFiltered = hasActiveFilters(filters)
@@ -53,6 +57,22 @@ export function TransactionsView() {
   }, [filters.page, totalPages, isPlaceholderData, setFilters])
 
   const clearFilters = () => setFilters({ q: '', type: '', status: '' })
+
+  // Opening from a row adds a Back step, so closing steps back rather than adding another entry.
+  // A drawer opened from a shared link has nothing to step back to, so closing just drops `txn`.
+  const openedFromList = useRef(false)
+  const openDetails = (transaction: Transaction) => {
+    openedFromList.current = true
+    setFilters({ txn: transaction.id })
+  }
+  const closeDetails = () => {
+    if (openedFromList.current) {
+      openedFromList.current = false
+      router.back()
+    } else {
+      setFilters({ txn: null }, { history: 'replace' })
+    }
+  }
 
   let results: ReactNode
   if (isError && !data && !isFetching) {
@@ -100,7 +120,7 @@ export function TransactionsView() {
   } else {
     results = (
       <div className={cx(styles.results, isPlaceholderData && styles.stale)} aria-busy={isPlaceholderData}>
-        <TransactionList transactions={data.data} />
+        <TransactionList transactions={data.data} onSelect={openDetails} />
       </div>
     )
   }
@@ -124,6 +144,8 @@ export function TransactionsView() {
           onPageChange={(page) => setFilters({ page })}
         />
       )}
+
+      <TransactionDrawer transactionId={filters.txn} onClose={closeDetails} />
     </div>
   )
 }

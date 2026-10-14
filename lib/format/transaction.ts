@@ -1,4 +1,4 @@
-import type { TransactionStatus, TransactionType } from '@/types/api'
+import type { Transaction, TransactionStatus, TransactionType } from '@/types/api'
 
 export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
   deposit: 'Deposit',
@@ -19,4 +19,12 @@ export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
   successful: 'Successful',
   pending: 'Pending',
   failed: 'Failed',
+}
+
+/** "Transfer out to Kwame Mensah", "Transfer in from Ada Okafor", otherwise the type, e.g. "Card payment". */
+export function describeTransaction({ type, counterparty }: Pick<Transaction, 'type' | 'counterparty'>) {
+  const label = TRANSACTION_TYPE_LABELS[type]
+  if (counterparty && type === 'transfer_out') return `${label} to ${counterparty}`
+  if (counterparty && type === 'transfer_in') return `${label} from ${counterparty}`
+  return label
 }

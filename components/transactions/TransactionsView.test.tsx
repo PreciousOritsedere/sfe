@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ApiError } from '@/lib/api/client'
 import { getTransactions } from '@/lib/api/endpoints'
@@ -8,7 +8,7 @@ import { TransactionsView } from './TransactionsView'
 
 vi.mock('@/lib/api/endpoints', () => ({ getTransactions: vi.fn(), getTransaction: vi.fn() }))
 
-const router = { push: vi.fn(), replace: vi.fn() }
+const router = { push: vi.fn(), replace: vi.fn(), back: vi.fn() }
 let search = ''
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
@@ -37,18 +37,26 @@ const response = (data: Transaction[], total = data.length) => ({
 function renderView(query = '') {
   search = query
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  render(
+  const ui = () => (
     <QueryClientProvider client={queryClient}>
       <TransactionsView />
     </QueryClientProvider>
   )
-  return userEvent.setup()
+  const view = render(ui())
+  const user = userEvent.setup()
+  /** Simulates the router landing on a new URL. */
+  const navigate = (next: string) => {
+    search = next
+    view.rerender(ui())
+  }
+  return Object.assign(user, { navigate })
 }
 
 beforeEach(() => {
   vi.mocked(getTransactions).mockReset()
   router.push.mockReset()
   router.replace.mockReset()
+  router.back.mockReset()
 })
 
 describe('TransactionsView', () => {
@@ -94,6 +102,33 @@ describe('TransactionsView', () => {
 
     expect(await screen.findByText('No transactions yet')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument()
+  })
+
+  it('opens details from a row and steps back when closed', async () => {
+    vi.mocked(getTransactions).mockResolvedValue(response([tx]))
+    const user = renderView()
+
+    await user.click(await screen.findByRole('button', { name: /Wallet top-up/ }))
+    expect(router.push).toHaveBeenCalledWith('/transactions?txn=txn_1', { scroll: false })
+
+    user.navigate('txn=txn_1')
+    const dialog = screen.getByRole('dialog', { name: 'Transaction details' })
+    expect(dialog).toHaveTextContent('ACM-1')
+    await user.keyboard('{Escape}')
+
+    expect(router.back).toHaveBeenCalled()
+  })
+
+  it('opens details from a shared link and removes them from the URL when closed', async () => {
+    vi.mocked(getTransactions).mockResolvedValue(response([tx]))
+    const user = renderView('page=1&txn=txn_1')
+
+    const dialog = await screen.findByRole('dialog', { name: 'Transaction details' })
+    expect(await within(dialog).findByText('ACM-1')).toBeInTheDocument()
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+
+    expect(router.replace).toHaveBeenCalledWith('/transactions', { scroll: false })
+    expect(router.back).not.toHaveBeenCalled()
   })
 
   it('moves a page past the end to the last page without adding a Back step', async () => {
