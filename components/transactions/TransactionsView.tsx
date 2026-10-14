@@ -1,9 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import { hasActiveFilters } from '@/lib/transactions/filters'
-import { useTransactions } from '@/lib/transactions/queries'
+import { PAGE_SIZE, useTransactions } from '@/lib/transactions/queries'
 import { useTransactionFilters } from '@/lib/transactions/useTransactionFilters'
 import { FilterBar } from './FilterBar'
+import { Pagination } from './Pagination'
 import { TransactionList } from './TransactionList'
 import styles from './TransactionsView.module.css'
 
@@ -12,8 +14,16 @@ const plural = (count: number, noun: string) =>
 
 export function TransactionsView() {
   const { filters, setFilters } = useTransactionFilters()
-  const { data } = useTransactions(filters)
+  const { data, isPlaceholderData } = useTransactions(filters)
   const total = data?.meta?.total
+  const totalPages = data?.meta?.totalPages
+
+  // A shared or stale link can point past the last page (e.g. after the results shrank).
+  useEffect(() => {
+    if (!isPlaceholderData && totalPages !== undefined && filters.page > totalPages) {
+      setFilters({ page: totalPages }, { history: 'replace' })
+    }
+  }, [filters.page, totalPages, isPlaceholderData, setFilters])
 
   return (
     <div className={styles.page}>
@@ -27,6 +37,16 @@ export function TransactionsView() {
       <FilterBar filters={filters} onChange={setFilters} />
 
       {data && <TransactionList transactions={data.data} />}
+
+      {total !== undefined && totalPages !== undefined && filters.page <= totalPages && (
+        <Pagination
+          page={filters.page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={(page) => setFilters({ page })}
+        />
+      )}
     </div>
   )
 }
