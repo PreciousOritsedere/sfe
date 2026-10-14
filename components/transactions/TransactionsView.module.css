@@ -16,3 +16,11 @@
   font-size: var(--text-md);
   color: var(--color-text-muted);
 }
+
+.results {
+  transition: opacity var(--duration-normal) var(--ease-out);
+}
+
+.stale {
+  opacity: 0.6;
+}

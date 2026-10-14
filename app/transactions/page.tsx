@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { TransactionsView } from '@/components/transactions'
+import { TransactionsView, TransactionsViewFallback } from '@/components/transactions'
 
 export const metadata: Metadata = { title: 'Transactions' }
 
 export default function TransactionsPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<TransactionsViewFallback />}>
       <TransactionsView />
     </Suspense>
   )
