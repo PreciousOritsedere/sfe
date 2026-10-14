@@ -30,23 +30,24 @@ export function UserMenu() {
       >
         <Avatar src={user?.avatarUrl ?? null} alt="" size="sm" />
         <span className={styles.name}>{user?.firstName}</span>
-        <Icon name="chevron-down" size={16} />
+        <span className={styles.chevron}>
+          <Icon name="chevron-down" size={16} />
+        </span>
       </button>
-      {open && (
-        <div className={styles.dropdown}>
-          {user ? (
-            <>
-              <div className={styles.fullName}>
-                {user.firstName} {user.lastName}
-              </div>
-              <div className={styles.email}>{user.email}</div>
-              <div className={styles.tier}>{TIER_LABELS[user.tier]} account</div>
-            </>
-          ) : (
-            <div className={styles.status}>{isError ? 'Couldn’t load your profile.' : 'Loading…'}</div>
-          )}
-        </div>
-      )}
+      {/* Kept mounted (and inert while closed) so it can animate out. */}
+      <div className={styles.dropdown} data-state={open ? 'open' : 'closed'} inert={!open}>
+        {user ? (
+          <>
+            <div className={styles.fullName}>
+              {user.firstName} {user.lastName}
+            </div>
+            <div className={styles.email}>{user.email}</div>
+            <div className={styles.tier}>{TIER_LABELS[user.tier]} account</div>
+          </>
+        ) : (
+          <div className={styles.status}>{isError ? 'Couldn’t load your profile.' : 'Loading…'}</div>
+        )}
+      </div>
     </div>
   )
 }

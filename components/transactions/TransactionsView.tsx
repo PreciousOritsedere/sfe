@@ -59,7 +59,8 @@ export function TransactionsView() {
   const clearFilters = () => setFilters({ q: '', type: '', status: '' })
   const changePage = (page: number) => {
     setFilters({ page })
-    window.scrollTo({ top: 0 })
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' })
   }
 
   // Opening from a row adds a Back step, so closing steps back rather than adding another entry.

@@ -78,7 +78,7 @@ describe('TransactionsView', () => {
     await user.click(await screen.findByRole('button', { name: 'Next page' }))
 
     expect(router.push).toHaveBeenCalledWith('/transactions?page=2', { scroll: false })
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
     scrollTo.mockRestore()
   })
 
