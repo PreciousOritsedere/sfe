@@ -70,6 +70,18 @@ describe('TransactionsView', () => {
     expect(screen.getByText('237 transactions')).toBeInTheDocument()
   })
 
+  it('goes to the next page and scrolls back to the top', async () => {
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    vi.mocked(getTransactions).mockResolvedValue(response([tx], 237))
+    const user = renderView()
+
+    await user.click(await screen.findByRole('button', { name: 'Next page' }))
+
+    expect(router.push).toHaveBeenCalledWith('/transactions?page=2', { scroll: false })
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0 })
+    scrollTo.mockRestore()
+  })
+
   it('shows an error with a working "Try again"', async () => {
     vi.mocked(getTransactions)
       .mockRejectedValueOnce(new ApiError(500, 'INTERNAL_ERROR', 'Boom'))

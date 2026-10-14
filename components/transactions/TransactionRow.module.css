@@ -18,6 +18,11 @@
   background: var(--color-bg-subtle);
 }
 
+/* Inset so the ring isn't clipped by the list card's rounded overflow. */
+.row:focus-visible {
+  outline-offset: -2px;
+}
+
 .grid {
   display: grid;
   grid-template-areas:

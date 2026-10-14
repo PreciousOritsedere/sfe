@@ -57,6 +57,10 @@ export function TransactionsView() {
   }, [filters.page, totalPages, isPlaceholderData, setFilters])
 
   const clearFilters = () => setFilters({ q: '', type: '', status: '' })
+  const changePage = (page: number) => {
+    setFilters({ page })
+    window.scrollTo({ top: 0 })
+  }
 
   // Opening from a row adds a Back step, so closing steps back rather than adding another entry.
   // A drawer opened from a shared link has nothing to step back to, so closing just drops `txn`.
@@ -141,7 +145,7 @@ export function TransactionsView() {
           totalPages={totalPages}
           total={total}
           pageSize={PAGE_SIZE}
-          onPageChange={(page) => setFilters({ page })}
+          onPageChange={changePage}
         />
       )}
 
