@@ -32,6 +32,7 @@
   --color-wallet-ghs: #b45309;
 
   --color-overlay: rgb(26 26 46 / 0.4);
+  --color-scrollbar: color-mix(in srgb, var(--color-primary) 35%, white);
   --color-focus: #5b2bd8;
 
   /* Spacing (4px grid) */

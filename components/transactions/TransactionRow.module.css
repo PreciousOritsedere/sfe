@@ -1,10 +1,7 @@
 .row {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-4);
+  container-type: inline-size;
+  display: block;
   width: 100%;
-  min-height: 68px;
   padding: var(--space-3) var(--space-6);
   border: 0;
   border-bottom: 1px solid var(--color-border);
@@ -21,18 +18,28 @@
   background: var(--color-bg-subtle);
 }
 
-.icon {
-  display: inline-flex;
+/* Inset so the ring isn't clipped by the list card's rounded overflow. */
+.row:focus-visible {
+  outline-offset: -2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-areas:
+    'avatar main status amount'
+    'avatar main status meta';
+  grid-template-columns: 40px minmax(0, 1fr) 112px minmax(168px, max-content);
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
+  column-gap: var(--space-4);
+  min-height: 44px;
+}
+
+.avatar {
+  grid-area: avatar;
 }
 
 .main {
+  grid-area: main;
   min-width: 0;
 }
 
@@ -53,13 +60,15 @@
   white-space: nowrap;
 }
 
-.end {
-  display: block;
-  text-align: right;
+.status {
+  grid-area: status;
+  justify-self: start;
 }
 
-.amount,
-.credit {
+.amount {
+  grid-area: amount;
+  align-self: end;
+  justify-self: end;
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
 }
@@ -69,9 +78,43 @@
 }
 
 .meta {
-  display: block;
+  grid-area: meta;
+  align-self: start;
+  justify-self: end;
   margin-top: var(--space-1);
   font-size: var(--text-xs);
   color: var(--color-text-subtle);
   white-space: nowrap;
+}
+
+/* Narrow lists (mobile, dashboard sidebar): status moves under the amount. */
+@container (max-width: 560px) {
+  .grid {
+    grid-template-areas:
+      'avatar main amount'
+      'avatar main status'
+      'avatar meta .';
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    column-gap: var(--space-3);
+  }
+
+  .status {
+    align-self: start;
+    justify-self: end;
+    margin-top: var(--space-1);
+  }
+
+  .meta {
+    justify-self: start;
+  }
+
+  .timeOnly .meta {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .row {
+    padding: var(--space-3) var(--space-4);
+  }
 }

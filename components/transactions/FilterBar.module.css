@@ -1,0 +1,39 @@
+.bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.search {
+  flex: 1;
+}
+
+.select {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.clear {
+  flex-shrink: 0;
+  height: 40px;
+}
+
+@media (max-width: 640px) {
+  .bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search {
+    grid-column: 1 / -1;
+  }
+
+  .select {
+    width: auto;
+  }
+
+  .clear {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+}
